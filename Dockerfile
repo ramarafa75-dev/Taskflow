@@ -12,14 +12,11 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
-
 RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 8000
 
-CMD cp .env.example .env && \
-    php artisan key:generate && \
-    touch /tmp/database.sqlite && \
+CMD touch /tmp/database.sqlite && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
     php artisan serve --host=0.0.0.0 --port=$PORT
