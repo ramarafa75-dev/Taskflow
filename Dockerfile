@@ -13,16 +13,10 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
-# Entrypoint script
-RUN echo '#!/bin/bash\n\
-touch /tmp/database.sqlite\n\
-php artisan migrate --force\n\
-php artisan db:seed --force\n\
-php artisan config:cache\n\
-php artisan route:cache\n\
-php artisan view:cache\n\
-php artisan serve --host=0.0.0.0 --port=$PORT' > /app/start.sh \
-&& chmod +x /app/start.sh
-
 EXPOSE 8000
-CMD ["/bin/bash", "/app/start.sh"]
+
+CMD touch /tmp/database.sqlite && \
+    php artisan config:clear && \
+    php artisan migrate --force && \
+    php artisan db:seed --force && \
+    php artisan serve --host=0.0.0.0 --port=$PORT
