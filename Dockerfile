@@ -12,12 +12,17 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
-RUN touch /tmp/database.sqlite
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-RUN php artisan migrate --force \
-    && php artisan db:seed --force
+
+# Entrypoint script
+RUN echo '#!/bin/bash\n\
+touch /tmp/database.sqlite\n\
+php artisan migrate --force\n\
+php artisan db:seed --force\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+php artisan view:cache\n\
+php artisan serve --host=0.0.0.0 --port=$PORT' > /app/start.sh \
+&& chmod +x /app/start.sh
 
 EXPOSE 8000
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD ["/bin/bash", "/app/start.sh"]
